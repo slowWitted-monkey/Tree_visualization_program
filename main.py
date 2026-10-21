@@ -202,6 +202,7 @@ class TrailTreeExplorer(tk.Tk):
         self.order = tk.StringVar(value="Preorder")
         self.mode = tk.StringVar(value="Build manually")
         self.arrangement = tk.StringVar(value="Binary search tree")
+        self.node_label = tk.StringVar()
         self.value_text = tk.StringVar()
         self.sequence = []
         self.step_index = 0
@@ -244,7 +245,7 @@ class TrailTreeExplorer(tk.Tk):
         self.manual_box = tk.Frame(sidebar, bg=BG)
         self._small_label(self.manual_box, "NODE LABEL")
         self.value_entry = tk.Entry(
-            self.manual_box, textvariable=self.value_text, bg=PANEL,
+            self.manual_box, textvariable=self.node_label, bg=PANEL,
             fg=TEXT, insertbackground=CYAN, relief="flat",
             highlightthickness=1, highlightbackground="#3a505e",
             highlightcolor=CYAN, font=("Segoe UI", 11)
@@ -419,7 +420,7 @@ class TrailTreeExplorer(tk.Tk):
                 messagebox.showinfo("Choose a child side", "Both child positions are occupied. Select another node.")
 
     def _label_value(self):
-        label = self.value_text.get().strip()
+        label = self.node_label.get().strip()
         if not label:
             messagebox.showinfo("Enter a node label", "Type a short label for the new node.")
             return None
@@ -436,7 +437,7 @@ class TrailTreeExplorer(tk.Tk):
         if label is None:
             return
         self.root_node = self.selected = Node(label)
-        self.value_text.set("")
+        self.node_label.set("")
         self._changed(f"{label} is the root: the starting point of the tree.")
 
     def add_child(self, side):
@@ -459,7 +460,7 @@ class TrailTreeExplorer(tk.Tk):
         child = Node(label, parent=self.selected)
         setattr(self.selected, side, child)
         self.selected = child
-        self.value_text.set("")
+        self.node_label.set("")
         self._changed(f"Added {label} as the {side} child of {parent_label}.")
 
     def build_from_values(self):
@@ -495,6 +496,7 @@ class TrailTreeExplorer(tk.Tk):
         self.sequence = []
         self.step_index = 0
         self.value_text.set("")
+        self.node_label.set("")
         self.node_info.set("Click a node to inspect its connections and route from the root.")
         self.status.set("Workspace cleared. Create a root or build a tree from values.")
         self.mode.set("Build manually")
