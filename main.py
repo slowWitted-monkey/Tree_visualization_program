@@ -262,8 +262,8 @@ class TrailTreeExplorer(tk.Tk):
         self.root_button.pack(fill="x", pady=3)
         child_buttons = tk.Frame(self.manual_box, bg=BG)
         child_buttons.pack(fill="x", pady=3)
-        self._button(child_buttons, "+ Left child", lambda: self.add_child("left"), TEAL).pack(side="left", expand=True, fill="x", padx=(0, 3))
-        self._button(child_buttons, "+ Right child", lambda: self.add_child("right"), TEAL).pack(side="left", expand=True, fill="x", padx=(3, 0))
+        self._button(child_buttons, "+ Left child", lambda: self.add_child("left"), CYAN).pack(side="left", expand=True, fill="x", padx=(0, 3))
+        self._button(child_buttons, "+ Right child", lambda: self.add_child("right"), CYAN).pack(side="left", expand=True, fill="x", padx=(3, 0))
         self._button(self.manual_box, "Remove selected subtree", self.remove_selected, RED).pack(fill="x", pady=3)
         tk.Label(self.manual_box,
                  text="Click a node in the map to choose its parent. A binary node has at most one left and one right child.",
@@ -306,7 +306,7 @@ class TrailTreeExplorer(tk.Tk):
         controls = tk.Frame(sidebar, bg=BG)
         controls.pack(fill="x", pady=6)
         self._button(controls, "Step", self.step, BLUE).pack(side="left", expand=True, fill="x", padx=(0, 3))
-        self.play_button = self._button(controls, "Play", self.play, TEAL)
+        self.play_button = self._button(controls, "Play", self.play, CYAN)
         self.play_button.pack(side="left", expand=True, fill="x", padx=3)
         self._button(controls, "Reset", self.reset_walk, PANEL_RAISED).pack(side="left", expand=True, fill="x", padx=(3, 0))
         self._small_label(sidebar, "MAP NAVIGATION")
