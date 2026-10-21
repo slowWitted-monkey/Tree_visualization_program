@@ -576,7 +576,7 @@ class TrailTreeExplorer(tk.Tk):
         while current:
             ancestors.append(current.label)
             current = current.parent
-        route = " → ".join(reversed(ancestors) + [node.label]) if ancestors else node.label
+        route = " → ".join(list(reversed(ancestors)) + [node.label]) if ancestors else node.label
         self.node_info.set(
             f"{node.label}: {kind}  •  parent: {parent}  •  children: {', '.join(children) or 'none'}"
             f"  •  level: {depth(node)}  •  route: {route}"
