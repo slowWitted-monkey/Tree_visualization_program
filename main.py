@@ -242,7 +242,9 @@ class TrailTreeExplorer(tk.Tk):
         mode.pack(fill="x")
         mode.bind("<<ComboboxSelected>>", lambda _e: self._show_mode())
 
-        self.manual_box = tk.Frame(sidebar, bg=BG)
+        self.build_area = tk.Frame(sidebar, bg=BG)
+        self.build_area.pack(fill="x")
+        self.manual_box = tk.Frame(self.build_area, bg=BG)
         self._small_label(self.manual_box, "NODE LABEL")
         self.value_entry = tk.Entry(
             self.manual_box, textvariable=self.node_label, bg=PANEL,
@@ -268,7 +270,7 @@ class TrailTreeExplorer(tk.Tk):
                  bg=BG, fg=MUTED, font=("Segoe UI", 8), wraplength=272,
                  justify="left").pack(anchor="w", pady=(5, 0))
 
-        self.values_box = tk.Frame(sidebar, bg=BG)
+        self.values_box = tk.Frame(self.build_area, bg=BG)
         self._small_label(self.values_box, "VALUES  •  NUMBERS SEPARATED BY SPACES OR COMMAS")
         self.value_entry_values = tk.Entry(
             self.values_box, textvariable=self.value_text, bg=PANEL,
