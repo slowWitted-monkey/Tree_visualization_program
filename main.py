@@ -9,6 +9,8 @@ from __future__ import annotations
 from collections import deque
 from dataclasses import dataclass
 import math
+import ast
+import operator
 import tkinter as tk
 from tkinter import messagebox, ttk
 
@@ -124,6 +126,50 @@ def is_complete(root):
     return True
 
 
+
+_ALLOWED_BINARY_OPERATORS = {
+    ast.Add: "+", ast.Sub: "-", ast.Mult: "*", ast.Div: "/",
+    ast.FloorDiv: "//", ast.Mod: "%", ast.Pow: "**",
+}
+
+
+def build_expression(raw):
+    """Parse arithmetic into a tree without evaluating or executing the input."""
+    if not raw.strip():
+        raise ValueError("Enter an arithmetic expression, such as (3 + 4) * 2.")
+    try:
+        parsed = ast.parse(raw, mode="eval")
+    except SyntaxError:
+        raise ValueError("That expression is not valid. Check your operators and parentheses.") from None
+
+    count = 0
+    def convert(item):
+        nonlocal count
+        count += 1
+        if count > 31:
+            raise ValueError("Use an expression with 31 nodes or fewer so it remains readable.")
+        if isinstance(item, ast.BinOp) and type(item.op) in _ALLOWED_BINARY_OPERATORS:
+            node = Node(_ALLOWED_BINARY_OPERATORS[type(item.op)])
+            node.left = convert(item.left)
+            node.left.parent = node
+            node.right = convert(item.right)
+            node.right.parent = node
+            return node
+        if isinstance(item, ast.UnaryOp) and isinstance(item.op, (ast.UAdd, ast.USub)):
+            node = Node("u+" if isinstance(item.op, ast.UAdd) else "u-")
+            node.left = convert(item.operand)
+            node.left.parent = node
+            return node
+        if isinstance(item, ast.Constant) and isinstance(item.value, (int, float)) and not isinstance(item.value, bool):
+            return Node(str(item.value))
+        if isinstance(item, ast.Name):
+            return Node(item.id)
+        raise ValueError("Use numbers, variable names, parentheses, and +, -, *, /, //, %, or ** only.")
+
+    root = convert(parsed.body)
+    return root
+
+
 def parse_values(raw):
     tokens = raw.replace(",", " ").split()
     if not tokens:
@@ -237,7 +283,7 @@ class TrailTreeExplorer(tk.Tk):
         tk.Label(sidebar, text="Choose a build method", bg=BG, fg=MUTED,
                  font=("Segoe UI", 9)).pack(anchor="w", pady=(2, 4))
         mode = ttk.Combobox(sidebar, textvariable=self.mode,
-                            values=("Build manually", "Build from values"),
+                            values=("Build manually", "Build from values", "Build expression tree"),
                             state="readonly")
         mode.pack(fill="x")
         mode.bind("<<ComboboxSelected>>", lambda _e: self._show_mode())
@@ -290,6 +336,23 @@ class TrailTreeExplorer(tk.Tk):
                  justify="left").pack(anchor="w", pady=(6, 3))
         self._button(self.values_box, "Build from values", self.build_from_values, BLUE).pack(fill="x", pady=3)
         self.value_entry_values.bind("<Return>", lambda _e: self.build_from_values())
+
+        self.expression_box = tk.Frame(self.build_area, bg=BG)
+        self._small_label(self.expression_box, "ARITHMETIC EXPRESSION")
+        self.expression_text = tk.StringVar(value="(3 + 4) * 2")
+        self.expression_entry = tk.Entry(
+            self.expression_box, textvariable=self.expression_text, bg=PANEL,
+            fg=TEXT, insertbackground=CYAN, relief="flat",
+            highlightthickness=1, highlightbackground="#3a505e",
+            highlightcolor=CYAN, font=("Consolas", 11)
+        )
+        self.expression_entry.pack(fill="x", ipady=8)
+        tk.Label(self.expression_box,
+                 text="Builds an expression tree using operator nodes and operand leaves. Supports +, -, *, /, //, %, **, unary signs, and parentheses.",
+                 bg=BG, fg=MUTED, font=("Segoe UI", 8), wraplength=272,
+                 justify="left").pack(anchor="w", pady=(6, 3))
+        self._button(self.expression_box, "Build expression tree", self.build_expression_tree, BLUE).pack(fill="x", pady=3)
+        self.expression_entry.bind("<Return>", lambda _e: self.build_expression_tree())
 
         quick = tk.Frame(sidebar, bg=BG)
         quick.pack(fill="x", pady=(7, 4))
@@ -404,10 +467,13 @@ class TrailTreeExplorer(tk.Tk):
     def _show_mode(self):
         self.manual_box.pack_forget()
         self.values_box.pack_forget()
+        self.expression_box.pack_forget()
         if self.mode.get() == "Build manually":
             self.manual_box.pack(fill="x")
-        else:
+        elif self.mode.get() == "Build from values":
             self.values_box.pack(fill="x")
+        else:
+            self.expression_box.pack(fill="x")
         if hasattr(self, "root_button"):
             self.root_button.configure(state="normal" if self.root_node is None else "disabled")
 
@@ -478,6 +544,17 @@ class TrailTreeExplorer(tk.Tk):
                 if self.arrangement.get() == "Binary search tree"
                 else "Values fill each level from left to right.")
         self._changed(f"Tree built. {rule}")
+
+    def build_expression_tree(self):
+        try:
+            root = build_expression(self.expression_text.get())
+        except ValueError as error:
+            messagebox.showerror("Couldn't build the expression tree", str(error))
+            return
+        self.root_node = self.selected = root
+        self.mode.set("Build expression tree")
+        self._show_mode()
+        self._changed("Expression tree built. Operators are parent nodes; operands are leaves.")
 
     def remove_selected(self):
         node = self.selected
