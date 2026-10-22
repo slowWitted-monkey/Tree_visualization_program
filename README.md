@@ -24,6 +24,10 @@ No third-party packages are required.
 
 Manual labels and bulk numeric values have separate fields, so switching build modes will not mix their input.
 
+### Build an expression tree
+
+Choose **Build expression tree** and enter an arithmetic expression, for example `(3 + 4) * 2` or `a * (b + 5)`. Select **Build expression tree** to visualize it. Operators become parent nodes and numbers or variable names become operand leaves. Parentheses and operator precedence are respected. Supported operators are `+`, `-`, `*`, `/`, `//`, `%`, and `**`, including unary signs. Input is parsed as an expression; it is not executed as Python code. The same traversal controls work with expression trees.
+
 ### Build from values
 
 Choose **Build from values**, enter numeric values separated by spaces or commas, and select an arrangement:
